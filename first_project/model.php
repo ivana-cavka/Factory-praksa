@@ -64,80 +64,85 @@ abstract class Model {
         return $this->toArray();
     }
 
-    public function save() {
+    public function saveModel() {
         global $db;
         try {
             // set the PDO error mode to exception
             $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            //spremanje novog modela u bazu, u tablicu Model
             $sql = "INSERT INTO model (attributes, allowed, table_name) 
             VALUES ('". $this->attributesToString($this->attributes) ."', ". $this->allowed .", '". $this->table_name ."');";
             $db->connection->exec($sql);
             $this->id = $db->connection->lastInsertId();
+            //stvaranje nove tablice po modelu (ako ne postoji)
+            $attribute_columns = implode(" TEXT, ", $this->attributes);
+            $attribute_columns = "id int NOT NULL AUTO_INCREMENT PRIMARY KEY," . $attribute_columns . " TEXT";
+            var_dump($attribute_columns);
+            $db->connection->query("CREATE TABLE IF NOT EXISTS " . $this->table_name . " (" . $attribute_columns .  ")");
         } catch(PDOException $e) {
             echo $sql . "<br>" . $e->getMessage();
         }
     } //RADI
-
-    public function getAll() {
-        global $db;
-        try {
-            // set the PDO error mode to exception <----- treba li uvijek?
-            //$db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $models = $db->connection->query('SELECT * FROM model')->fetchAll(PDO::FETCH_CLASS, get_class($this));
-            var_dump($models);
-            return $models;
-        } catch(PDOException $e) {
-            echo $models . "<br>" . $e->getMessage();
-        }
-    } //NE RADI
-    //OUTPUT: array(1) { [0]=> object(User)#5 (4) { ["attributes":"Model":private]=> NULL ["allowed":"Model":private]=> bool(false) ["table_name":"Model":private]=> NULL ["id":"Model":private]=> string(1) "1" } }
-
-    public function getById($id) {
-        global $db;
-        try {
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'SELECT attributes, allowed, table_name, id
-                    FROM model
-                    WHERE id = :id';
-            $statement = $db->connection->prepare($sql);
-            $statement->execute([':id' => $id]);
-            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this));
-            $model = $statement->fetch();
-            echo $model->attributes;
-            //$attribute_array = $model->attributesFromString($model->attributes);
-            //$model->attributes=$attribute_array;
-            var_dump($model);
-        } catch(PDOException $e) {
-            echo $model . "<br>" . $e->getMessage();
-        }
-    }  //NE RADI
-    //OUTPUT: object(User)#5 (4) { ["attributes":"Model":private]=> NULL ["allowed":"Model":private]=> bool(false) ["table_name":"Model":private]=> NULL ["id":"Model":private]=> string(1) "1" }
-
-    public function getByProperty($name, $value) {
-        global $db;
-        try {
-            // set the PDO error mode to exception
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = $db->connection->prepare("SELECT * FROM model WHERE ". $name ." = ". $value);
-            $sql->execute();
-            return $sql->fetchColumn();
-        } catch(PDOException $e) {
-            echo $sql . "<br>" . $e->getMessage();
-        }
-    }  //NE RADI
 
     public function delete() {
         global $db;
         try {
             // set the PDO error mode to exception
             $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //$db->connection->query('DELETE FROM model WHERE id = '. $this->id);
-            $sql = 'DELETE FROM model WHERE id = :id';
+            $sql = 'DELETE FROM ' . get_class($this) . ' WHERE id = :id';
             $statement = $db->connection->prepare($sql);
-            $statement->execute([':id' => $this->id]);
+            echo $this->id; //ništa, iako je u mainu dodana vrijednost
+            $statement->bindParam(':id', $this->id);
+            $statement->execute();
         } catch(PDOException $e) {
             echo $e->getMessage();
         }
+    } //RADI ZA HARDKODIRANE VRIJEDNOSTI (npr 2), ALI NE I ZA VARIJABILNE ($this->id)
+
+    public function getAll() {
+        global $db;
+        try {
+            //set the PDO error mode to exception <----- treba li uvijek?
+            //$db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $models = $db->connection->query('SELECT * FROM ' . get_class($this))->fetchAll(PDO::FETCH_CLASS, get_class($this));
+            return $models;
+        } catch(PDOException $e) {
+            echo $models . "<br>" . $e->getMessage();
+        }
     } //RADI
+   
+    public function getById($id) {
+        global $db;
+        try {
+            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = 'SELECT *
+                    FROM model
+                    WHERE id = ?';
+            $statement = $db->connection->prepare($sql);
+            $statement->execute([$id]);
+            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this));
+            $model = $statement->fetch();
+            return $model;
+        } catch(PDOException $e) {
+            echo $model . "<br>" . $e->getMessage();
+        }
+    }  //NE RADI
+    //OUTPUT: false -> ne pronalazi?
+
+    public function getByProperty($name, $value) {
+        global $db;
+        try {
+            // set the PDO error mode to exception
+            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $statement = $db->connection->prepare("SELECT * FROM model WHERE '". $name ."' = '". $value . "'");
+            $statement->execute();
+            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this));
+            $model = $statement->fetch();
+            return $model;
+        } catch(PDOException $e) {
+            echo $model . "<br>" . $e->getMessage();
+        }
+    }  //NE RADI
+    //OUTPUT: false -> ne pronalazi?
 }
 ?>

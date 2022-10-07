@@ -1,16 +1,16 @@
 <?php 
-include 'user.php';
+include 'all_models.php';
 
 //$test = new User(["first_name", "last_name", "email"], true, "User"); //id=1
-$test = new User(["username", "email", "password"], true, "Admin"); //id=2
-$test->id = 3;
-//echo $test;
-/* $test->table = "tbl2";
-echo "<br>" . $test; */ 
+$test = new Product();
 $db = new DatabaseConnection();
 $db->openConnection();
-$result = $test->delete();
-//echo $result;
-//$db->closeConnection();
-//$test->save();
+$test->title = "laptop";
+$test->description = "lenovo";
+$test->price = 5000;
+$test->id = 2;
+echo $test->id;
+$test->delete();
+//var_dump($test->getByProperty('title', 'laptop'));
+$db->closeConnection();
 ?>
