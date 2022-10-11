@@ -1,14 +1,15 @@
 <?php 
 include "attribute.php";
 include "db.php";
+include "imodel.php";
 
-abstract class Model {
+abstract class Model implements modelInterface {
     use Attribute;
 
-    private $attributes; 
-    private $allowed;
-    private $table_name;
-    private $id;
+    protected $attributes; 
+    protected $allowed;
+    protected $table_name;
+    protected $id;
 
     public function __construct($attributes = null, $allowed = false, $table = null) {
         $this->attributes = $attributes;
@@ -82,22 +83,19 @@ abstract class Model {
         } catch(PDOException $e) {
             echo $sql . "<br>" . $e->getMessage();
         }
-    } //RADI
+    } 
 
     public function delete() {
         global $db;
         try {
             // set the PDO error mode to exception
             $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'DELETE FROM ' . get_class($this) . ' WHERE id = :id';
-            $statement = $db->connection->prepare($sql);
-            echo $this->id; //ništa, iako je u mainu dodana vrijednost
-            $statement->bindParam(':id', $this->id);
-            $statement->execute();
+            $sql = "DELETE FROM " . get_class($this) . " WHERE id = '" . strval($this->id) . "';";
+            $db->connection->exec($sql);
         } catch(PDOException $e) {
             echo $e->getMessage();
         }
-    } //RADI ZA HARDKODIRANE VRIJEDNOSTI (npr 2), ALI NE I ZA VARIJABILNE ($this->id)
+    }
 
     public function getAll() {
         global $db;
@@ -109,22 +107,21 @@ abstract class Model {
         } catch(PDOException $e) {
             echo $models . "<br>" . $e->getMessage();
         }
-    } //RADI
+    } 
    
     public function getById($id) {
         global $db;
         try {
             $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = 'SELECT *
-                    FROM model
-                    WHERE id = ?';
+            $sql = "SELECT * FROM " . get_class($this) . " WHERE id = " . $id;
             $statement = $db->connection->prepare($sql);
-            $statement->execute([$id]);
-            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this));
-            $model = $statement->fetch();
-            return $model;
+            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this)); 
+            //$result = $db->connection->query("SELECT * FROM " . get_class($this) . " WHERE id = '" . strval($id) . "';")->fetch(PDO::FETCH_CLASS, get_class($this));
+            $result = $statement->fetch();
+            var_dump($result);
+            return $result;
         } catch(PDOException $e) {
-            echo $model . "<br>" . $e->getMessage();
+            echo "<br>" . $e->getMessage();
         }
     }  //NE RADI
     //OUTPUT: false -> ne pronalazi?
