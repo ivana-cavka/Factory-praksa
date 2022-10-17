@@ -1,13 +1,18 @@
 <?php 
-include "Attribute.php";
 include "DatabaseConnection.php";
+include "Attribute.php";
+include "Timestamp.php";
 
 abstract class Model {
     use Attribute;
-
+    use Timestamp;
+    
     protected static $attributes; 
     protected static $allowed;
     protected static $table_name; 
+    protected $created_at;
+    protected $updated_at;
+    protected $deleted_at;
     protected $id;
 
     public function toArray() {
@@ -80,11 +85,28 @@ abstract class Model {
         }
     } 
 
-    public function delete() {
+    public function forceDelete() {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
             $sql = "DELETE FROM " . static::$table_name . " WHERE id = '" . strval($this->id) . "';";
+            $connection->exec($sql);
+        } catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
+
+    public function update() {
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
+        try {
+            $attributes_str = $this->attributesToString(static::$attributes);
+            $update_str = "";
+            foreach(static::$attributes as $attribute) {
+                $update_str .= $attribute . " = '" . $this->$attribute . "', '";
+            }
+            $update_str = rtrim($update_str, ", '");
+            $sql = "UPDATE " . static::$table_name . " SET " . $update_str . " WHERE id = '" . strval($this->id) . "';";
             $connection->exec($sql);
         } catch(PDOException $e) {
             echo $e->getMessage();
