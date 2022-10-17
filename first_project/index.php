@@ -2,9 +2,6 @@
 include 'User.php';
 
 $test = new User(); 
-/* $test->attributes = ["first_name", "last_name", "email"];
-$test->allowed = ["first_name", "last_name", "email"];
-$test->table_name = "User";*/
 /* $test->first_name = "Maja";
 $test->last_name = "Odak";
 $test->email = "mo23230@unist.hr";
