@@ -2,12 +2,10 @@
 
 trait Attribute  {
     public function attributesToString() {
-        return implode(", ", $this->attributes);
+        return implode(", ", Model::$attributes);
     }
 
-    public function attributesFromString(string $string) {
+    /* public function attributesFromString(string $string) {
         $this->attributes = explode(", ", $string);
-    }
+    }  */
 }
-
-?>

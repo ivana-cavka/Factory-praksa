@@ -1,46 +1,44 @@
 <?php 
-include "attribute.php";
-include "db.php";
-include "imodel.php";
+include "Attribute.php";
+include "DatabaseConnection.php";
 
-abstract class Model implements modelInterface {
+abstract class Model {
     use Attribute;
 
-    protected $attributes; 
-    protected $allowed;
-    protected $table_name;
+    protected static $attributes; 
+    protected static $allowed;
+    protected static $table_name; 
     protected $id;
-
-    public function __construct($attributes = null, $allowed = false, $table = null) {
-        $this->attributes = $attributes;
-        $this->allowed = $allowed;
-        $this->table_name = $table;
-    }
 
     public function toArray() {
         return array($this->attributes, $this->allowed);
     }
 
     //$this->var;
-    public function __get($name) {
-        if($name == null)
-            return $this;
-        return $this->$name;
-    }
+    public function __get(string $name) {
+        if($name)
+            return $this->name;
+        return $this;
+    }//ako postoji varijabla, vrati varijablu, ili ne, ili da je $name string
+    //solid princip -> ne treba kakav je name vec samo this->var, problem je sta ce vratit gresku ili null posto var ne postoji
 
     //$this->var = new_state;
     public function __set($name, $value) {
         $this->$name = $value;
-    }
+    }//osugirat da se ne moze setat nesto sta ne postoji
 
     //echo $obj
     public function __toString() {
-        return "\tattributes: " . $this->attributesToString($this->attributes) . "\tallowed: " . $this->allowed . "\ttable_name: " . $this->table_name . "\tid: " . $this->id;
+        return "\tattributes: " . $this->attributesToString(static::$attributes) . "\tallowed: " . $this->attributesToString(static::$allowed) . "\ttable_name: " . static::$table_name . "\tid: " . $this->id;
     }  
 
     //koristi se više za private i protected metode?
     public function __call($method, $args) {
-        if ( !method_exists( $this, $method ) ) throw new Error("This method does not exist in this class.");
+        return call_user_func($method, $args);
+    }//return method, args
+
+    public static function __callStatic($method, $args) {
+        return call_user_func($method, $args);
     }
 
     public function __isset($property) {
@@ -53,93 +51,83 @@ abstract class Model implements modelInterface {
 
     //__wakeup() after you unserialize() the object - sesija se otvara, otvori konekciju s bazom
     public function __wakeup() {
-        $db = new DatabaseConnection;
-        $db->openConnection();
+        $db = DatabaseConnection::getInstance();
         //TO_DO: izvuci podatke?
     }
 
     //__sleep() is called when you serialize() an object - sesija gotova, konekcija s bazom se zatvara
     public function __sleep() {
-        global $db;
+        $db = DatabaseConnection::getInstance();
         $db->closeConnection();
         return $this->toArray();
     }
 
-    public function saveModel() {
-        global $db;
+    public function save() {
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
         try {
-            // set the PDO error mode to exception
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            //spremanje novog modela u bazu, u tablicu Model
-            $sql = "INSERT INTO model (attributes, allowed, table_name) 
-            VALUES ('". $this->attributesToString($this->attributes) ."', ". $this->allowed .", '". $this->table_name ."');";
-            $db->connection->exec($sql);
-            $this->id = $db->connection->lastInsertId();
-            //stvaranje nove tablice po modelu (ako ne postoji)
-            $attribute_columns = implode(" TEXT, ", $this->attributes);
-            $attribute_columns = "id int NOT NULL AUTO_INCREMENT PRIMARY KEY," . $attribute_columns . " TEXT";
-            var_dump($attribute_columns);
-            $db->connection->query("CREATE TABLE IF NOT EXISTS " . $this->table_name . " (" . $attribute_columns .  ")");
+            $attributes_str = $this->attributesToString(static::$attributes);
+            $values_str = "";
+            foreach(static::$attributes as $attribute) {
+                $values_str .= $this->$attribute . "', '";
+            }
+            $values_str = rtrim($values_str, ", '");
+            $sql = "INSERT INTO " . static::$table_name . " (" . $attributes_str . ")" . " VALUES ('". $values_str ."');";
+            $connection->exec($sql);
+            $this->id = $connection->lastInsertId();
         } catch(PDOException $e) {
             echo $sql . "<br>" . $e->getMessage();
         }
     } 
 
     public function delete() {
-        global $db;
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
         try {
-            // set the PDO error mode to exception
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "DELETE FROM " . get_class($this) . " WHERE id = '" . strval($this->id) . "';";
-            $db->connection->exec($sql);
+            $sql = "DELETE FROM " . static::$table_name . " WHERE id = '" . strval($this->id) . "';";
+            $connection->exec($sql);
         } catch(PDOException $e) {
             echo $e->getMessage();
         }
     }
 
     public function getAll() {
-        global $db;
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
         try {
-            //set the PDO error mode to exception <----- treba li uvijek?
-            //$db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $models = $db->connection->query('SELECT * FROM ' . get_class($this))->fetchAll(PDO::FETCH_CLASS, get_class($this));
+            $models = $connection->query("SELECT * FROM " . static::$table_name)->fetchAll(PDO::FETCH_CLASS, static::$table_name);
             return $models;
         } catch(PDOException $e) {
-            echo $models . "<br>" . $e->getMessage();
+            echo $e->getMessage();
         }
     } 
    
     public function getById($id) {
-        global $db;
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
         try {
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "SELECT * FROM " . get_class($this) . " WHERE id = " . $id;
-            $statement = $db->connection->prepare($sql);
-            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this)); 
-            //$result = $db->connection->query("SELECT * FROM " . get_class($this) . " WHERE id = '" . strval($id) . "';")->fetch(PDO::FETCH_CLASS, get_class($this));
+            $sql = "SELECT * FROM " . static::$table_name . " WHERE id = " . $id;
+            $statement = $connection->prepare($sql);
+            $statement->execute();
+            $statement->setFetchMode(PDO::FETCH_CLASS, static::$table_name); 
             $result = $statement->fetch();
-            var_dump($result);
             return $result;
         } catch(PDOException $e) {
             echo "<br>" . $e->getMessage();
         }
-    }  //NE RADI
-    //OUTPUT: false -> ne pronalazi?
+    } 
 
     public function getByProperty($name, $value) {
-        global $db;
+        $db = DatabaseConnection::getInstance();
+        $connection = $db->getConnection();
         try {
-            // set the PDO error mode to exception
-            $db->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $statement = $db->connection->prepare("SELECT * FROM model WHERE '". $name ."' = '". $value . "'");
+            $statement = $connection->prepare("SELECT * FROM " . static::$table_name . " WHERE ". $name ." = '". $value . "'");
             $statement->execute();
-            $statement->setFetchMode(PDO::FETCH_CLASS, get_class($this));
+            $statement->setFetchMode(PDO::FETCH_CLASS, static::$table_name);
             $model = $statement->fetch();
             return $model;
         } catch(PDOException $e) {
-            echo $model . "<br>" . $e->getMessage();
+            echo $e->getMessage();
         }
-    }  //NE RADI
-    //OUTPUT: false -> ne pronalazi?
+    }  
 }
-?>
