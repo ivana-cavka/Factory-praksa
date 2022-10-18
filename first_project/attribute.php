@@ -2,7 +2,7 @@
 
 trait Attribute  {
     public function attributesToString() {
-        return implode(", ", Model::$attributes);
+        return implode(", ", User::$attributes);
     }
 
     /* public function attributesFromString(string $string) {

@@ -6,16 +6,20 @@ trait Timestamp  {
 
     public function save() {
         $this->created_at = $this->updated_at = Carbon::now('Europe/Zagreb');
-        parent::save();
+        $this->save();
     }
 
     public function update() {
         $this->updated_at = Carbon::now('Europe/Zagreb');
-        parent::save();
+        $this->update();
     }
     
     public function delete() {
-        $this->delted_at = Carbon::now('Europe/Zagreb');
-        parent::update();
+        $this->deleted_at = Carbon::now('Europe/Zagreb');
+        $this->update();
+    }
+
+    public function isDeleted() {
+        return $this->deleted_at == null;
     }
 }

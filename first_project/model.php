@@ -5,7 +5,11 @@ include "Timestamp.php";
 
 abstract class Model {
     use Attribute;
-    use Timestamp;
+    use Timestamp {
+        Timestamp::save as saveWithTimestamp;
+        Timestamp::update as updateWithTimestamp;
+        Timestamp::delete as deleteWithTimestamp;
+    }
     
     protected static $attributes; 
     protected static $allowed;
@@ -71,12 +75,15 @@ abstract class Model {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
-            $attributes_str = $this->attributesToString(static::$attributes);
-            $values_str = "";
+            $attributes_str = $values_str = "";
             foreach(static::$attributes as $attribute) {
-                $values_str .= $this->$attribute . "', '";
+                if($this->$attribute != null) {
+                    $values_str .= $this->$attribute . "', '";
+                    $attributes_str .= $attribute . ", ";
+                }
             }
             $values_str = rtrim($values_str, ", '");
+            $attributes_str = rtrim($attributes_str, ", ");
             $sql = "INSERT INTO " . static::$table_name . " (" . $attributes_str . ")" . " VALUES ('". $values_str ."');";
             $connection->exec($sql);
             $this->id = $connection->lastInsertId();
@@ -100,13 +107,15 @@ abstract class Model {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
-            $attributes_str = $this->attributesToString(static::$attributes);
             $update_str = "";
             foreach(static::$attributes as $attribute) {
-                $update_str .= $attribute . " = '" . $this->$attribute . "', '";
+                if($this->$attribute != null) {
+                    $update_str .= $attribute . " = '" . $this->$attribute . "', ";
+                }
             }
-            $update_str = rtrim($update_str, ", '");
-            $sql = "UPDATE " . static::$table_name . " SET " . $update_str . " WHERE id = '" . strval($this->id) . "';";
+            $update_str = rtrim($update_str, ", ");
+            echo $update_str;
+            $sql = "UPDATE " . static::$table_name . " SET " . $update_str . " WHERE id = " . strval($this->id) . ";";
             $connection->exec($sql);
         } catch(PDOException $e) {
             echo $e->getMessage();
@@ -117,7 +126,7 @@ abstract class Model {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
-            $models = $connection->query("SELECT * FROM " . static::$table_name)->fetchAll(PDO::FETCH_CLASS, static::$table_name);
+            $models = $connection->query("SELECT * FROM " . static::$table_name . " WHERE deleted_at is NULL")->fetchAll(PDO::FETCH_CLASS, static::$table_name);
             return $models;
         } catch(PDOException $e) {
             echo $e->getMessage();
@@ -128,7 +137,7 @@ abstract class Model {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
-            $sql = "SELECT * FROM " . static::$table_name . " WHERE id = " . $id;
+            $sql = "SELECT * FROM " . static::$table_name . " WHERE id = " . $id . " AND deleted_at is NULL";
             $statement = $connection->prepare($sql);
             $statement->execute();
             $statement->setFetchMode(PDO::FETCH_CLASS, static::$table_name); 
@@ -143,7 +152,7 @@ abstract class Model {
         $db = DatabaseConnection::getInstance();
         $connection = $db->getConnection();
         try {
-            $statement = $connection->prepare("SELECT * FROM " . static::$table_name . " WHERE ". $name ." = '". $value . "'");
+            $statement = $connection->prepare("SELECT * FROM " . static::$table_name . " WHERE ". $name ." = '". $value . "' AND deleted_at is NULL");
             $statement->execute();
             $statement->setFetchMode(PDO::FETCH_CLASS, static::$table_name);
             $model = $statement->fetch();
