@@ -1,7 +1,20 @@
-<?php 
+<?php
+
+use FirstProject\Router\Router;
+
 require_once 'vendor\autoload.php';
 
-$test = new FirstProject\Model\User\User(); 
+$request = $_SERVER['REQUEST_URI'];
+
+$router = new Router();
+$router::add('','');
+$router::add('users','Users');
+$router::run();
+
+
+
+
+//$test = new FirstProject\Model\User\User(); 
 //$test = $test->getByProperty("first_name","Maja");
 /* $test->first_name = "Ivana";
 $test->last_name = "Čavka";
@@ -15,7 +28,7 @@ echo "main: " . $test->id; */
 /* $test->email = "ic47480@unist.hr";
 $test->update();
 $test->delete(); */
-$test = $test->getAll();
-var_dump($test);
+/* $test = $test->getAll();
+var_dump($test); */
 //$test->delete();
 ?>

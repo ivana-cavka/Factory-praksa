@@ -3,6 +3,6 @@
         "carbondate/carbon": "^1.33"
     },
     "autoload": {
-        "classmap": ["FirstProject/Model", "FirstProject/DatabaseConnection"]
+        "classmap": ["FirstProject/Model", "FirstProject/DatabaseConnection", "FirstProject/Router"]
     }
 }
