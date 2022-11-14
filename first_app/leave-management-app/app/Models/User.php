@@ -49,4 +49,19 @@ class User extends Authenticatable
      * @var array
      */
     protected $appends = ['maxLeaveDays','leaveDaysLeft','role','projectId','teamId'];
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function users()
+    {
+        return $this->hasMany(Inquiry::class);
+    }
 }
