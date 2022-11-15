@@ -14,5 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome! :)');
 });
+Route::get('/users', [UserController::class, 'getAllUsers']);
+Route::get('/teams', [TeamController::class, 'getAllTeams']);
+Route::get('/projects', [ProjectController::class, 'getAllProjects']);
+Route::get('/inquiries', [InquiryController::class, 'getAllInquiries']);
+
+//php artisan serve
+//php artisan route::list
