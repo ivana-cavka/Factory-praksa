@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    protected $table = 'Users'; //mapira se automatski
 
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -50,18 +51,16 @@ class User extends Authenticatable
      */
     protected $appends = ['maxLeaveDays','leaveDaysLeft','role','projectId','teamId'];
 
-    public function team()
-    {
+    public function team() {
         return $this->belongsTo(Team::class);
     }
 
-    public function project()
-    {
+    public function project() {
         return $this->belongsTo(Project::class);
     }
 
-    public function users()
-    {
+    public function users() {
         return $this->hasMany(Inquiry::class);
     }
+
 }

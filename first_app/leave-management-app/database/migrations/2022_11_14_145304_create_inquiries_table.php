@@ -22,10 +22,6 @@ class CreateInquiriesTable extends Migration
             $table->boolean('projectLeadApproval');
             $table->timestamps();
         });
-
-        Schema::table('inquiries', function($table) {
-            $table->foreign('employeeId')->references('id')->on('users');
-        });
     }
 
     /**
