@@ -11,4 +11,11 @@ class TeamController extends Controller
         $teams = Team::paginate(8);
         return view('teams', ['teams' => $teams]);
     }
+
+    public function saveTeam(Request $request) {
+        $team = new Team;
+        $team->title = $request->title;
+        $team->save();
+        return redirect('admin')->with('status', 'New Team Has Been inserted');
+    }
 }

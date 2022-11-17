@@ -9,11 +9,18 @@
     Password: <input type='text' name='password'>
     <br><br>
     Role: 
-    <select name="roles">
+    <select name="role">
         <option value="admin">ADMIN</option>
         <option value="project lead">PROJECT LEAD</option>
         <option value="team lead">TEAM LEAD</option>
         <option value="member">MEMBER</option>
+    </select>
+    <br><br>
+    Max leave days: <input type='number' name='maxLeaveDays'>
+    <br><br>
+    Team: --TO DO--
+    <br><br>
+    Project: --TO DO--
     <br><br>
     <button type='submit'>SAVE</button>
 </form>

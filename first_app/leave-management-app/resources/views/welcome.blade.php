@@ -19,6 +19,12 @@
                 font-family: 'Nunito', sans-serif;
                 color: #fff;
             }
+            hr {
+                width:2px;
+                border-width:2;
+                size:5px;
+                color:'red';
+            }
         </style>
     </head>
     <body class="antialiased">

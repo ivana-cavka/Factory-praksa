@@ -15,7 +15,7 @@ class CreateInquiriesTable extends Migration
     {
         Schema::create('inquiries', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('employeeId')->unsigned()->index();
+            $table->bigInteger('employeeId')->unsigned()->index()->default(NULL);
             $table->date('startDate');
             $table->integer('numOfDays');
             $table->boolean('teamLeadApproval');

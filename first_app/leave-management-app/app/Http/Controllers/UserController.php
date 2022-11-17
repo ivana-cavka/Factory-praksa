@@ -18,8 +18,10 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = $request->password;
+        $user->role = $request->role;
         $user->projectId = $request->projectId;
         $user->teamId = $request->teamId;
+        $user->maxLeaveDays = $user->leaveDaysLeft = $request->maxLeaveDays;
         $user->save();
         return redirect('admin')->with('status', 'New Employee Has Been inserted');
     }

@@ -28,6 +28,11 @@ Route::get('/inquiries', [InquiryController::class, 'getAllInquiries']);
 Route::get('/admin', [AdminController::class, 'getAdminData']);
 Route::view('/form_user','create_new_user');
 Route::post('/save_new_user', [UserController::class, 'saveUser']);
-
+Route::view('/form_team','create_new_team');
+Route::post('/save_new_team', [TeamController::class, 'saveTeam']);
+Route::view('/form_project','create_new_project');
+Route::post('/save_new_project', [ProjectController::class, 'saveProject']);
+Route::view('/form_inquiry','create_new_inquiry');
+Route::post('/save_new_inquiry', [InquiryController::class, 'saveInquiry']);
 //php artisan serve
 //php artisan route::list
