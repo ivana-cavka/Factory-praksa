@@ -18,8 +18,8 @@ class CreateInquiriesTable extends Migration
             $table->bigInteger('employeeId')->unsigned()->index()->default(NULL);
             $table->date('startDate');
             $table->integer('numOfDays');
-            $table->boolean('teamLeadApproval');
-            $table->boolean('projectLeadApproval');
+            $table->enum('teamLeadApproval', [0,1,2]);
+            $table->enum('projectLeadApproval', [0,1,2]);
             $table->timestamps();
         });
     }

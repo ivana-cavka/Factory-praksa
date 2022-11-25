@@ -35,7 +35,7 @@
 <hr>
 <div>
     <div>
-        <h4>PROJECTS:</h4>
+        <h4>PROJECTS:</h4> 
         @foreach ($projects as $project)
             <p>title: {{ $project->title }} &#9 lead: &#9 members: </p>
         @endforeach

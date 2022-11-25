@@ -1,6 +1,6 @@
 @extends('welcome')
 @section('content')
-<form action='save_new_inquiry' method='post'>
+<form action='save_new_inquiry/{{$id}}' method='post'>
     @csrf
     Start date: <input type='date' name='startDate'>
     <br><br>

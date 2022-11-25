@@ -2,22 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
-use App\Models\User;
-use App\Models\Inquiry;
-use App\Models\Team;
+use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\TeamRepositoryInterface;
+use App\Interfaces\ProjectRepositoryInterface;
+use App\Interfaces\InquiryRepositoryInterface;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
+    private UserRepositoryInterface $userRepository;
+    private TeamRepositoryInterface $teamRepository;
+    private ProjectRepositoryInterface $projectRepository;
+    private InquiryRepositoryInterface $inquiryRepository;
+
     public function getAdminData(Request $request) {
-        $regularEmployees = User::where('role','member')->get();
-        $admins = User::where('role','admin')->get();
-        $teamLeads = User::where('role','team lead')->get();
-        $projectLeads = User::where('role','project lead')->get();
-        $projects = Project::all();
-        $teams = Team::all();
-        $inquiries = Inquiry::all()->sortBy('startDate');
+        $regularEmployees = $this->userRepository->getUsersByRole('member');
+        $admins = $this->userRepository->getUsersByRole('admin');
+        $teamLeads = $this->userRepository->getUsersByRole('team lead');
+        $projectLeads = $this->userRepository->getUsersByRole('project lead');
+        $projects = $this->projectRepository->getAllProjects();
+        $teams = $this->teamRepository->getAllTeams();
+        $inquiries = $this->inquiryRepository->getAllInquiries()->sortBy('startDate');
         return view('admin_page', ['admins' => $admins, 
                                     'regulars' => $regularEmployees, 
                                     'prLeads' => $projectLeads, 
