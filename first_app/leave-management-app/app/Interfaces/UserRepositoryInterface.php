@@ -10,4 +10,8 @@ interface UserRepositoryInterface
     public function saveUser($new);
     public function updateUser($id, array $newDetails);
     public function getUsersByRole(string $role);
+    public function getTeamMembers($teamId);
+    public function getTeamLead($teamId);
+    public function getProjectMembers($projectId);
+    public function getProjectLead($projectId);
 }

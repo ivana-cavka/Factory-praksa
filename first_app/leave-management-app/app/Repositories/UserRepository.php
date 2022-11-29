@@ -28,7 +28,22 @@ class UserRepository implements UserRepositoryInterface
     }
 
     public function getUsersByRole(string $role) {
-        return User::where('role', $role);
+        return User::where('role', $role)->get();
     }
 
+    public function getTeamMembers($teamId) {
+        return User::where([['role','member'],['teamId', $teamId]])->orWhere([['role','project lead'],['teamId', $teamId]])->get();
+    }
+
+    public function getTeamLead($teamId) {
+        return User::where('teamId', $teamId and 'role','team lead')->first();
+    }
+
+    public function getProjectMembers($projectId) {
+        return User::where([['role','member'],['projectId', $projectId]])->orWhere([['role','team lead'],['projectId', $projectId]])->get();
+    }
+
+    public function getProjectLead($projectId) {
+        return User::where('projectId', $projectId and 'role','project lead')->first();
+    }
 }

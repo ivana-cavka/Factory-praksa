@@ -3,10 +3,13 @@
 namespace App\Repositories;
 
 use App\Interfaces\TeamRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 use App\Models\Team;
 
 class TeamRepository implements TeamRepositoryInterface 
 {
+    private UserRepositoryInterface $userRepository;
+
     public function getAllTeams() {
         return Team::all();
     }
@@ -25,10 +28,6 @@ class TeamRepository implements TeamRepositoryInterface
 
     public function updateTeam($id, array $newDetails) {
         return Team::whereId($id)->update($newDetails);
-    }
-
-    public function getTeamMembers($id) {
-        //$teamMembers = User::where('role','member' and 'teamId', $team->id)->get();
     }
 
 }

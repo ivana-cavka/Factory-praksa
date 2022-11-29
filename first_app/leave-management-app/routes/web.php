@@ -27,6 +27,8 @@ Route::get('/projects', [ProjectController::class, 'getAllProjects']);
 Route::get('/inquiries', [InquiryController::class, 'getAllInquiries']);
 Route::get('/admin', [AdminController::class, 'getAdminData']);
 Route::get('/user/{id}', [UserController::class, 'getUserData']);
+Route::get('/inquiry/{id}', [InquiryController::class, 'getInquiry']);
+Route::post('/update_inquiry', [InquiryController::class, 'updateInquiry']);
 Route::view('/form_user','create_new_user');
 Route::post('/save_new_user', [UserController::class, 'saveUser']);
 Route::view('/form_team','create_new_team');

@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Inquiry;
-use App\Models\Project;
-use App\Models\Team;
 use Illuminate\Http\Request;
 use App\Interfaces\UserRepositoryInterface;
 use App\Interfaces\ProjectRepositoryInterface;
 use App\Interfaces\TeamRepositoryInterface;
 use App\Interfaces\InquiryRepositoryInterface;
+use App\Repositories\InquiryRepository;
+use App\Repositories\ProjectRepository;
+use App\Repositories\TeamRepository;
+use App\Repositories\UserRepository;
 
 class UserController extends Controller
 {
@@ -19,6 +20,13 @@ class UserController extends Controller
     private ProjectRepositoryInterface $projectRepository;
     private InquiryRepositoryInterface $inquiryRepository;
 
+    public function __construct() {
+        $this->userRepository = new UserRepository;
+        $this->projectRepository = new ProjectRepository;
+        $this->teamRepository = new TeamRepository;
+        $this->inquiryRepository = new InquiryRepository;
+    }
+    
     public function getAllUsers(Request $request) {
         $users = $this->userRepository->getAllUsers();
         //dd($users[0]->name); //dump and die
@@ -46,18 +54,19 @@ class UserController extends Controller
         $inquiries = $this->inquiryRepository->getInquiriesByEmployee($id);
         $teamMembers = $projectMembers = $inquiriesByProjectMembers = $inquiriesByTeamMembers = null;
         if ($user->role == 'team lead') {
-            $teamMembers = User::where('role','member' and 'teamId', $team->id)->get();
+            $teamMembers = $this->userRepository->getTeamMembers($user->teamId);
+            
             foreach ($teamMembers as $member) {
-                $inquiriesByTeamMembers[$member->id] = Inquiry::where('employeeId', $member->id)->get();
+                $inquiriesByTeamMembers[$member->id] = $this->inquiryRepository->getInquiriesByEmployee($member->id);
             }
         } elseif ($user->role == 'project lead') {
-            $projectMembers = User::where('role','member' and 'projectId', $project->id)->get();
+            $projectMembers = $this->userRepository->getProjectMembers($user->projectId);
             foreach ($projectMembers as $member) {
-                $inquiriesByProjectMembers[$member->id] = Inquiry::where('employeeId', $member->id)->get();
+                $inquiriesByProjectMembers[$member->id] = $this->inquiryRepository->getInquiriesByEmployee($member->id);
             }
         }
-        $teamLead = User::where('teamId', $team->id and 'role','team lead')->first();
-        $projectLead = User::where('projectId', $project->id and 'role','project lead')->first();
+        $teamLead = $this->userRepository->getTeamLead($team->id);
+        $projectLead = $this->userRepository->getProjectLead($project->id);
         return view('member_page', ['user' => $user, 
                                     'project' => $project,
                                     'team' => $team,

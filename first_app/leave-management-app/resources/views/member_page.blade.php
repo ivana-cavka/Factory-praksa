@@ -2,7 +2,7 @@
 @section('content')
 <div>
     <button><meta http-equiv="refresh" content="10; url=/" /><a href='/form_inquiry/{{$user->id}}'>CREATE NEW INQUIRY</a></button>
-    <button><a href='/logout'>LOGOUT</a></button>
+    <button><meta http-equiv="refresh" content="10; url=/" /><a href='/logout'>LOGOUT</a></button>
 </div>
 
 @if ($user->role == "member")
@@ -34,11 +34,11 @@
                     &#9 inquiries: 
                     @foreach ($inquiriesByProjectMembers[$member->id] as $inquiry)
                         @if ($inquiry->teamLeadApproval && $inquiry->projectTeamApproval)
-                            &#9<a href="">&#9745</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9745</a>
                         @elseif ($inquiry->teamLeadApproval || $inquiry->projectTeamApproval)
-                            &#9<a href="">&quest</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&quest</a>
                         @else
-                            &#9<a href="">&#9746</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9746</a>
                         @endif
                     @endforeach
                 </p>
@@ -64,11 +64,11 @@
                     &#9 inquiries: 
                     @foreach ($inquiriesByTeamMembers[$member->id] as $inquiry)
                         @if ($inquiry->teamLeadApproval && $inquiry->projectTeamApproval)
-                            &#9<a href="">&#9745</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9745</a>
                         @elseif ($inquiry->teamLeadApproval || $inquiry->projectTeamApproval)
-                            &#9<a href="">&quest</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&quest</a>
                         @else
-                            &#9<a href="">&#9746</a>
+                            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9746</a>
                         @endif
                     @endforeach
                 </p>
@@ -83,11 +83,11 @@
     <h4>MY INQUIRIES:</h4>
     @foreach ($inquiries as $inquiry)
     <p>status: @if ($inquiry->teamLeadApproval && $inquiry->projectTeamApproval)
-            &#9<a href="">&#9745</a>
+            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9745</a>
         @elseif ($inquiry->teamLeadApproval || $inquiry->projectTeamApproval)
-            &#9<a href="">&quest</a>
+            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&quest</a>
         @else
-            &#9<a href="">&#9746</a>
+            &#9<meta http-equiv="refresh" content="10; url=/" /><a href="inquiry/{{$inquiry->id}}">&#9746</a>
         @endif
     start date: {{ $inquiry->startDate }}  &#9 number of days: {{ $inquiry->numOfDays }}</p>
     @endforeach
